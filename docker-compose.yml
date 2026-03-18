@@ -10,4 +10,4 @@ services:
       - OMLET_DEVICE_ID=${OMLET_DEVICE_ID}
     volumes:
       - .:/usr/src/app
-    #restart: unless-stopped
+    restart: no
