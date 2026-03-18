@@ -1,9 +1,12 @@
 import os
+from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 from dateutil import tz
 from suntime import Sun
 from smartcoop.client import SmartCoopClient
 from smartcoop.api.omlet import Omlet
+
+load_dotenv()
 
 LATITUDE = float(os.environ.get('COOP_LATITUDE'))
 LONGITUDE = float(os.environ.get('COOP_LONGITUDE'))
