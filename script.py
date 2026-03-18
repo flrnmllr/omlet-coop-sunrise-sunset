@@ -5,12 +5,12 @@ from suntime import Sun
 from smartcoop.client import SmartCoopClient
 from smartcoop.api.omlet import Omlet
 
-latitude = 51.4263901
-longitude = 7.0781257
+latitude = os.environ.get('COOP_LATITUDE')
+longitude = os.environ.get('COOP_LONGITUDE')
 
 sun = Sun(latitude, longitude)
 
-timezone = tz.gettz('Europe/Berlin')
+timezone = tz.gettz(os.environ.get('TIMEZONE'))
 sunrise_time = sun.get_sunrise_time().astimezone(timezone)
 sunset_time = sun.get_sunset_time().astimezone(timezone)
 
@@ -19,6 +19,7 @@ omlet = Omlet(client)
 device = omlet.get_device_by_id(os.environ.get('OMLET_DEVICE_ID'))
 
 configuration = device.configuration
+
 configuration.door.openMode = 'time'
 configuration.door.openTime = sunrise_time.strftime('%H:%M')
 configuration.door.closeMode = 'time'
