@@ -55,4 +55,8 @@ configuration.door.openTime = open_time.strftime('%H:%M')
 configuration.door.closeMode = 'time'
 configuration.door.closeTime = close_time.strftime('%H:%M')
 
+print('Configuration:', configuration)
+
 omlet.update_configuration(device.deviceId, configuration)
+
+print('Configuration updated')
