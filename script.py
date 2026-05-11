@@ -20,12 +20,71 @@ logger.addHandler(logging.StreamHandler())
 
 load_dotenv()
 
+def parse_optional_time(value):
+    """
+    Parse HH:MM into datetime.time or return None.
+    """
+    if not value:
+        return None
+
+    return datetime.strptime(value, "%H:%M").time()
+
+
+def apply_min_time(dt, min_time):
+    """
+    Ensure datetime is not earlier than min_time.
+    """
+    if min_time is None:
+        return dt
+
+    minimum = dt.replace(
+        hour=min_time.hour,
+        minute=min_time.minute,
+        second=0,
+        microsecond=0
+    )
+
+    return max(dt, minimum)
+
+
+def apply_max_time(dt, max_time):
+    """
+    Ensure datetime is not later than max_time.
+    """
+    if max_time is None:
+        return dt
+
+    maximum = dt.replace(
+        hour=max_time.hour,
+        minute=max_time.minute,
+        second=0,
+        microsecond=0
+    )
+
+    return min(dt, maximum)
+
 try:
     LATITUDE = float(os.environ.get("COOP_LATITUDE"))
     LONGITUDE = float(os.environ.get("COOP_LONGITUDE"))
     TIMEZONE = tz.gettz(os.environ.get("TIMEZONE"))
     OMLET_TOKEN = os.environ.get("OMLET_API_TOKEN")
     DEVICE_ID = os.environ.get("OMLET_DEVICE_ID")
+
+    EARLIEST_OPEN_TIME = parse_optional_time(
+        os.environ.get("EARLIEST_OPEN_TIME", "08:00")
+    )
+
+    LATEST_OPEN_TIME = parse_optional_time(
+        os.environ.get("LATEST_OPEN_TIME", "10:00")
+    )
+
+    EARLIEST_CLOSE_TIME = parse_optional_time(
+        os.environ.get("EARLIEST_CLOSE_TIME", "18:00")
+    )
+
+    LATEST_CLOSE_TIME = parse_optional_time(
+        os.environ.get("LATEST_CLOSE_TIME", "20:00")
+    )
 
     if None in [LATITUDE, LONGITUDE, TIMEZONE, OMLET_TOKEN, DEVICE_ID]:
         raise ValueError("Missing required environment variables")
@@ -58,6 +117,11 @@ except Exception as e:
 try:
     open_time = sunrise_tomorrow if now > sunrise_today else sunrise_today
     close_time = sunset_tomorrow if now > sunset_today else sunset_today
+
+    open_time = apply_min_time(open_time, EARLIEST_OPEN_TIME)
+    open_time = apply_max_time(open_time, LATEST_OPEN_TIME)
+    close_time = apply_min_time(close_time, EARLIEST_CLOSE_TIME)
+    close_time = apply_max_time(close_time, LATEST_CLOSE_TIME)
 
     logger.info(f"Open time: {open_time}")
     logger.info(f"Close time: {close_time}")
